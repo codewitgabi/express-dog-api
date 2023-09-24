@@ -1,11 +1,16 @@
 import "express-async-errors";
 import Dog from "../models/Dog.js";
+import Breed from "../models/Breed.js";
 import { APIError } from "../middlewares/errors.js";
 
 
 export const createDog = async (req, res) => {
   try {
     const newDog = await Dog.create(req.body);
+
+    const breed = await Breed.findById(req.body.breed);
+    breed.dogs.push(newDog._id)
+    breed.save()
 
     res.status(201).json(newDog);
   } catch (e) {
@@ -37,10 +42,10 @@ export const getDog = async (req, res) => {
 export const deleteDog = async (req, res) => {
   try {
     const dog = await Dog.findByIdAndDelete(req.params.dogId);
+    const breed = await Breed.findById(dog.breed)
+    breed.dogs = breed.dogs.filter((id) => id !== dog._id )
+    breed.save()
 
-    if (!dog) {
-      throw new APIError(`No dog found with id ${req.params.dogId}`);
-    }
     res.status(204).json(dog);
   } catch (e) {
     throw new APIError(e.message);

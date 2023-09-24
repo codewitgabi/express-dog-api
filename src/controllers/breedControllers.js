@@ -15,7 +15,7 @@ export const createBreed = async (req, res) => {
 
 export const getBreeds = async (req, res) => {
   try {
-    const breeds = await Breed.find({});
+    const breeds = await Breed.find({}).populate("dogs");
     res.json(breeds);
   } catch (e) {
     throw new APIError(e.message);
